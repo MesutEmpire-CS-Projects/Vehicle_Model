@@ -43,15 +43,16 @@ class Button:
 # 2. The Display Class
 class Display:
     def __init__(self):
-        self._result = None
         self._color = 'black'
-        self.petals_color = (generateRandomLength(0, 255), generateRandomLength(0, 255), generateRandomLength(0, 255))
+        self.petals_color = [(generateRandomLength(0, 255), generateRandomLength(0, 255),
+                              generateRandomLength(0, 255)) for _ in range(10)]
         self._scaled_surface = None
         self._x = WIDTH * 1 / 6
         self._y = HEIGHT * 1 / 3
         self.vehicle_color = (
             generateRandomLength(0, 255), generateRandomLength(0, 255), generateRandomLength(0, 255), 255)
 
+    # Show vehicle details
     def show(self):
         if len(data) == 0:
             car()
@@ -69,35 +70,36 @@ class Display:
             counter += 30
         screen.blit(type, type_rect)
 
+    # Scale the vehicle
     def scale(self):
         # Generate a random scaling factor
-        scaling_factor = random.random()  # Random scaling factor between 0 and 1
+        length = generateRandomLength(0.5,1.3)
 
-        print(scaling_factor)
+
         # Scale the car surface
-        scaled_surface = pygame.transform.scale(VEHICLE_SURFACE, (int(VEHICLE_SURFACE.get_width() * scaling_factor),
-                                                                  int(VEHICLE_SURFACE.get_height() * scaling_factor)))
-
+        scaled_surface = pygame.transform.scale(VEHICLE_SURFACE, (int(VEHICLE_SURFACE.get_width() * length),
+                                                                  int(VEHICLE_SURFACE.get_height() * length)))
 
         self._scaled_surface = scaled_surface
 
+    # Draw the vehicle
     def draw(self):
         step = 0
         self.resetSurface()
         if self.type == "Car":
             self.__drawCar()
             for i in range(7):
-                self.__drawFlower(screen, 100 + step, 850)
+                self.__drawFlower(screen, 100 + step, 850, self.petals_color[i])
                 step += 200
         elif self.type == "Truck":
             self.__drawTruck()
             for i in range(6):
-                self.__drawFlower(screen, 100 + step, 850)
+                self.__drawFlower(screen, 100 + step, 850, self.petals_color[i])
                 step += 200
         elif self.type == "SUV":
             self.__drawSUV()
             for i in range(8):
-                self.__drawFlower(screen, 100 + step, 850)
+                self.__drawFlower(screen, 100 + step, 850, self.petals_color[i])
                 step += 175
 
     def resetSurface(self):
@@ -200,12 +202,13 @@ class Display:
 
         screen.blit(self._scaled_surface if self._scaled_surface else VEHICLE_SURFACE, (self._x, self._y))
 
-    def __drawFlower(self, surface, x, y):
+    def __drawFlower(self, surface, x, y, color):
         # Draw the center of the flower
         pygame.draw.circle(surface, (255, 255, 0), (x, y), 20)
 
+        # Draw petals
         for i in range(16):
-            self.__drawPetal(surface, i * 22.5, x, y)
+            self.__drawPetal(surface, i * 22.5, x, y, color)
         # Draw stalk
         pygame.draw.line(surface, (139, 69, 19), (x, y + 20), (x, y + 100), 5)
 
@@ -213,7 +216,7 @@ class Display:
         pygame.draw.ellipse(surface, (0, 128, 0), pygame.Rect(x, y + 50, 80, 20))
         pygame.draw.ellipse(surface, (0, 128, 0), pygame.Rect(x - 80, y + 50, 80, 20))
 
-    def __drawPetal(self, surface, petal_angle, x, y):
+    def __drawPetal(self, surface, petal_angle, x, y, color):
         # Convert the angle to radians
         petal_angle_radians = radians(petal_angle)
 
@@ -230,10 +233,11 @@ class Display:
                                                10)
 
         # Draw the petal using the generated points
-        pygame.draw.polygon(surface, self.petals_color, bezier_points)
+        pygame.draw.polygon(surface, color, bezier_points)
 
     def setPetalColor(self):
-        self.petals_color = (generateRandomLength(0, 255), generateRandomLength(0, 255), generateRandomLength(0, 255))
+        self.petals_color = [(generateRandomLength(0, 255), generateRandomLength(0, 255),
+                              generateRandomLength(0, 255)) for _ in range(10)]
 
     def setVehicleColor(self):
         self.vehicle_color = (
@@ -250,6 +254,7 @@ class Display:
 
 
 data = {}
+
 
 # Function to generate points from a Bezier curve
 def generate_bezier_points(p0, p1, p2, p3, steps):
